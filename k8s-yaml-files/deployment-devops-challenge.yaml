@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: devops-challenge
+  name: devops-challenge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devops-challenge
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: devops-challenge
+    spec:
+      containers:
+      - name: devops-challenge
+        image: ahmednasrhassan/devops-challenge
+        ports:
+         - containerPort: 8000
+        envFrom:
+         - configMapRef:
+             name: env-configmap
+      - name: redis
+        image: redis
+        ports:
+        - containerPort: 6379

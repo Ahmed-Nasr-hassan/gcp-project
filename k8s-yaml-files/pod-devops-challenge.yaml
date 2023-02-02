@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: devops-challenge
+  labels:
+    app: myapp
+spec:
+  containers:
+  - name: devops-challenge
+    image: ahmednasrhassan/devops-challenge
+    ports:
+    - containerPort: 8000
+    envFrom:
+     - configMapRef:
+         name: env-configmap
+  - name: redis
+    image: redis
+    ports:
+    - containerPort: 6379
+~                            

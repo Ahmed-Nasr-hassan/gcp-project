@@ -1,0 +1,1 @@
+k expose deployment devops-challenge --type LoadBalancer --target-port 8000 --port 8000
