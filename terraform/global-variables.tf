@@ -18,15 +18,13 @@ resource "google_compute_subnetwork" "management-subnet" {
 resource "google_compute_subnetwork" "restricted-subnet" {
   name          = "restricted-subnet"
   ip_cidr_range = "10.0.1.0/24"
-  region        = "us-east1"
+  region        = "us-central1"
   network       = google_compute_network.vpc_network.id
-  secondary_ip_range {
-    range_name    = "pods-cidr-range"
-    ip_cidr_range = "192.168.1.0/24"
-  }
+  private_ip_google_access = true
 }
 
-# Create vpc peering
+## Create firewall rule to aloow internal traffic --- VERY IMPORTANT
+
 
 # to can reach gke from a vm its service account need 
 # to have access to (Allow full access to all Cloud APIs)
@@ -35,6 +33,12 @@ resource "google_compute_subnetwork" "restricted-subnet" {
 resource "google_service_account" "vm-sa" {
   account_id   = "default-vm-sa"
   display_name = "sa-private-vm"
+}
+
+resource "google_project_iam_member" "cluster-admin" {
+  project = "ahmed-nasr-iti-demo"
+  role    = "roles/container.admin"
+  member  = "serviceAccount:${google_service_account.vm-sa.email}"
 }
 
 resource "google_compute_instance" "private-vm" {
@@ -85,7 +89,7 @@ resource "google_compute_router_nat" "nat" {
 
 ## Allow incoming access to our instance via
 ## port 22, from the IAP servers
-resource "google_compute_firewall" "inbound-ip-ssh" {
+resource "google_compute_firewall" "inbound-iap-ssh" {
     name        = "allow-incoming-ssh-from-iap"
     network     = google_compute_network.vpc_network.name
     direction = "INGRESS"
@@ -99,37 +103,74 @@ resource "google_compute_firewall" "inbound-ip-ssh" {
     ]
 }
 
+resource "google_compute_firewall" "allow_internal_subnet_connection" {
+  name = "allow-internal-subnet-connection"
+  network = google_compute_network.vpc_network.name
+  direction = "INGRESS"
+  allow {
+    protocol = "all"
+  }
+  source_ranges = ["10.0.0.0/24"]
+}
+resource "google_service_account" "gke-sa" {
+  account_id   = "default-gke-sa"
+  display_name = "sa-gke"
+}
 
-# resource "google_service_account" "gke-sa" {
-#   account_id   = "default-gke-sa"
-#   display_name = "sa-gke"
-# }
+resource "google_project_iam_member" "gke_sa_storage_object_viewer" {
+  project = "ahmed-nasr-iti-demo"
+  role = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_service_account.gke-sa.email}"
+}
 
-# resource "google_container_cluster" "private-cluster" {
-#   name     = "private-gke-cluster"
-#   location = "us-east1"
+resource "google_container_cluster" "private-cluster" {
+  name     = "private-gke-cluster"
+  location = "us-central1-a" 
+  network = google_compute_network.vpc_network.self_link
+  subnetwork = google_compute_subnetwork.restricted-subnet.self_link
+  # We can't create a cluster with no node pool defined, but we want to only use
+  # separately managed node pools. So we create the smallest possible default
+  # node pool and immediately delete it.
+  remove_default_node_pool = true
+  initial_node_count       = 1
+  master_authorized_networks_config {
+    cidr_blocks {
+        cidr_block = "10.0.0.0/24"
+        display_name = "management_subnet"
+    }
+  }
 
-#   # We can't create a cluster with no node pool defined, but we want to only use
-#   # separately managed node pools. So we create the smallest possible default
-#   # node pool and immediately delete it.
-#   remove_default_node_pool = true
-#   initial_node_count       = 1
-# }
+  private_cluster_config {
+    enable_private_nodes = true
+    enable_private_endpoint = true
+    master_ipv4_cidr_block = "172.16.0.0/28"
+  }
 
-# resource "google_container_node_pool" "primary_preemptible_nodes" {
-#   name       = "my-node-pool"
-#   location   = "us-east1"
-#   cluster    = google_container_cluster.private-cluster.name
-#   node_count = 2
+  network_policy {
+    enabled = true
+  }
 
-#   node_config {
-#     preemptible  = true
-#     machine_type = "f1-micro"
+  ip_allocation_policy {
+  }
 
-#     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
-#     service_account = google_service_account.gke-sa.email
-#     oauth_scopes    = [
-#       "https://www.googleapis.com/auth/cloud-platform"
-#     ]
-#   }
-# }
+
+}
+
+
+resource "google_container_node_pool" "primary_preemptible_nodes" {
+  name       = "my-node-pool"
+  location   = "us-central1-a"
+  cluster    = google_container_cluster.private-cluster.name
+  node_count = 2
+
+  node_config {
+    preemptible  = true
+    machine_type = "g1-small"
+
+    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
+    service_account = google_service_account.gke-sa.email
+    oauth_scopes    = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+  }
+}
