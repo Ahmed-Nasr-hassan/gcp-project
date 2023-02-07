@@ -2,7 +2,7 @@ module "iam-section" {
   source = "./iam-and-admin"
   project_name = "ahmed-nasr-iti-demo"
   service_accounts = {
-      "sa-private-vm" = "roles/container.clusterAdmin",
+      "sa-private-vm" = "roles/container.admin",
       "sa-private-gke" = "roles/storage.objectViewer"
   }
 }
