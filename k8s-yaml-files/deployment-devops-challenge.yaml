@@ -5,7 +5,7 @@ metadata:
     app: devops-challenge
   name: devops-challenge
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: devops-challenge
@@ -15,6 +15,7 @@ spec:
       labels:
         app: devops-challenge
     spec:
+      replicas: 3
       containers:
       - name: devops-challenge
         image: ahmednasrhassan/devops-challenge

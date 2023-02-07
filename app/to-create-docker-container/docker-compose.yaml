@@ -4,7 +4,7 @@ services:
     image: redis:alpine
   hello-app:
     build: 
-      context: .
+      context: ..
       dockerfile: Dockerfile
     image: devops-challenge
     environment: # use configmap in kubernates cluster
