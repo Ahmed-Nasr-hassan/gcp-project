@@ -40,12 +40,7 @@ module "private-vm" {
   vm_subnet_self_link = module.vpc-network.management_subnet_self_link
   vm_service_account = module.iam-section.private-vm-sa-email
   vm_scopes = [ 
-     "https://www.googleapis.com/auth/devstorage.read_only",
-      "https://www.googleapis.com/auth/logging.write",
-      "https://www.googleapis.com/auth/monitoring.write",
-      "https://www.googleapis.com/auth/servicecontrol",
-      "https://www.googleapis.com/auth/service.management.readonly",
-      "https://www.googleapis.com/auth/trace.append"    
+     "https://www.googleapis.com/auth/cloud-platform"
   ]
 
 }
@@ -68,10 +63,7 @@ module "gke-cluster" {
   is_preemptible = true
   node_vm_type = "g1-small"
   gke_service_account_email = module.iam-section.gke-sa-email
-  oauth_scopes_list = [  
-        "https://www.googleapis.com/auth/logging.write",
-        "https://www.googleapis.com/auth/monitoring.write",
-        "https://www.googleapis.com/auth/devstorage.read_write",
-        "https://www.googleapis.com/auth/compute"
+  oauth_scopes_list = [ 
+     "https://www.googleapis.com/auth/cloud-platform"
   ]
 }
