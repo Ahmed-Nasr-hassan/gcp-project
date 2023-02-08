@@ -217,19 +217,19 @@ gke cluster load balancer services
 
 ---
 
-Testing network load balancer service respone
+testing network load balancer service respone
 
 ![Alt text](./photos/loadbalancer-ip-respone.png?raw=true "Title")
 
 ---
 
-Ingress and cluster overview
+ingress and cluster overview
 
 ![Alt text](./photos/ingress-controller.png?raw=true "Title")
 
 ---
 
-Ingress controller installation
+ingress controller installation
 
 ![Alt text](./photos/ingress-controller-installation.png?raw=true "Title")
 
