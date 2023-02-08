@@ -1,1 +1,0 @@
-k expose pod devops-challenge --type NodePort --target-port 8000 --port 8000

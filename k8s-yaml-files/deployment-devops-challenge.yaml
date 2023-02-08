@@ -15,7 +15,6 @@ spec:
       labels:
         app: devops-challenge
     spec:
-      replicas: 3
       containers:
       - name: devops-challenge
         image: ahmednasrhassan/devops-challenge
@@ -25,6 +24,6 @@ spec:
          - configMapRef:
              name: env-configmap
       - name: redis
-        image: redis
+        image: gcr.io/ahmed-nasr-iti-demo/redis
         ports:
         - containerPort: 6379

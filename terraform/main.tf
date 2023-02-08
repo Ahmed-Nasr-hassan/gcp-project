@@ -2,6 +2,7 @@ module "iam-section" {
   source = "./iam-and-admin"
   project_name = "ahmed-nasr-iti-demo"
   service_accounts = {
+      # service_account_name = required_role
       "sa-private-vm" = "roles/container.admin",
       "sa-private-gke" = "roles/storage.objectViewer"
   }
@@ -42,7 +43,6 @@ module "private-vm" {
   vm_scopes = [ 
      "https://www.googleapis.com/auth/cloud-platform"
   ]
-
 }
 
 module "gke-cluster" {
