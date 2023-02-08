@@ -111,6 +111,7 @@
 ### Pushing images to gcr.io
 
 - ./configurations/creating-pushing-gcr-image.sh
+- devops challenge image created from ./app/Dockerfile
 
 ```bash
     docker build -t gcr.io/ahmed-nasr-iti-demo/devops-challenge:v1.0 ../app
