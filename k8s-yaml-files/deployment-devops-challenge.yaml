@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: devops-challenge
-        image: gcr.io/ahmed-nasr-iti-demo/devops-challenge
+        image: gcr.io/ahmed-nasr-iti-demo/devops-challenge:v1.0
         ports:
          - containerPort: 8000
         envFrom:
